@@ -1,49 +1,62 @@
+#set working directory and important list of relevant participants
 setwd("/Users/abbiepopa/Documents/Lab/DPTB/Cortisol Analysis/cortdata from Elliot/Working")
 Participants<-read.csv("PartList_DPTB.csv", na.strings=".")
 
+#import reaction time data for TD participants
 RTTD<-read.csv("DPTB_RT_9-17-14_TDKoralyOut.csv",na.strings="NaN")
 RTTD<-RTTD[,c(1,9,10)]
 
+#import reaction time data for participants with 22q
 RT22q<-read.csv("DPTB_RT_9-17-14_22qKoralyOut.csv", na.strings="NaN")
 RT22q<-RT22q[,c(1,9,10)]
 
 RT<-rbind(RTTD,RT22q)
 
-
+#import cortisol data
 Cort<-read.csv("CORT-Data-EAB_July2014.csv")
 Cort<-Cort[,c(1, 3:6)]
 colnames(Cort)[1]<-"CABIL_ID"
 
+#import spence and ABAS data
 SpenceABAS<-read.csv("Clustering_Database_8-8-14.csv", na.strings="-9999")
 
+#import overall gaze data
 EyeGazeOverall<-read.csv("AllData.csv", na.strings="NA")
 EyeGazeOverall<-EyeGazeOverall[,2:11]
 colnames(EyeGazeOverall)[1]<-"CABIL_ID"
 
+#import time course gaze data
 EyeGazeTimeCourse<-read.csv("AllDataTC25no676.csv", na.strings="NA")
 EyeGazeTimeCourse<-EyeGazeTimeCourse[,2:24]
 colnames(EyeGazeTimeCourse)[1]<-"CABIL_ID"
 
+#import overall pupilometry for kids with 22q
 PupilOverall22q<-read.csv("PupilPilot_6-5-14_22q.csv", na.strings=".")
 PupilOverall22q<-PupilOverall22q[,c(1:7, 9:13)]
 colnames(PupilOverall22q)[1]<-"CABIL_ID"
 
+#import overall pupilometry to kids who are TD
 PupilOverallTD<-read.csv("PupilPilot_6-5-14_TD.csv", na.strings=".")
 PupilOverallTD<-PupilOverallTD[,c(1:7,9:13)]
 colnames(PupilOverallTD)[1]<-"CABIL_ID"
 
+#merge Dx groups
 PupilOverall<-rbind(PupilOverall22q, PupilOverallTD)
 
+#import time course pupilometry data for kids who are TD
 PupilChangeTD<-read.csv("PupilChange_6-5-14_TD.csv",na.strings=".")
 PupilChangeTD<-PupilChangeTD[,1:7]
 colnames(PupilChangeTD)[1]<-"CABIL_ID"
 
+#import time course pupilometry data for kids with 22q
 PupilChange22q<-read.csv("PupilChange_6-5-14_22q.csv",na.strings=".")
 PupilChange22q<-PupilChange22q[,1:7]
 colnames(PupilChange22q)[1]<-"CABIL_ID"
 
+#merge TC pupil data
 PupilChange<-rbind(PupilChangeTD,PupilChange22q)
 
+#merge data set
 AllDataCortAnalysis<-merge(Participants, Cort, all.x=T)
 AllDataCortAnalysis<-merge(AllDataCortAnalysis, SpenceABAS, all.x=T)
 AllDataCortAnalysis<-merge(AllDataCortAnalysis, RT, all.x=T)
@@ -52,6 +65,7 @@ AllDataCortAnalysis<-merge(AllDataCortAnalysis, EyeGazeTimeCourse, all.x=T)
 AllDataCortAnalysis<-merge(AllDataCortAnalysis, PupilOverall, all.x=T)
 AllDataCortAnalysis<-merge(AllDataCortAnalysis, PupilChange, all.x=T)
 
+#calculate change in cort, and change in log cort
 AllDataCortAnalysis$CortDelta<-AllDataCortAnalysis$PostCORT-AllDataCortAnalysis$PreCORT
 AllDataCortAnalysis$LogCortDelta<-log10(AllDataCortAnalysis$CortDelta+1)
 AllDataCortAnalysis$CortLogDelta<-AllDataCortAnalysis$LogPostCort-AllDataCortAnalysis$LogPreCort
@@ -63,7 +77,7 @@ colnames(Clus)[1]<-"CABIL_ID"
 
 AllDataCortAnalysis<-merge(AllDataCortAnalysis, Clus, all.x=T)
 
-### pow, neg, or no change in cort
+### pos, neg, or no change in cort
 BinAssigner<-function(x){
 	if(is.na(x)){
 		thebin<-NA
